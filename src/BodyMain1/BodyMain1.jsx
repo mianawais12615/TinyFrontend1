@@ -3,7 +3,8 @@ import "./BodyMain1.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { faHighlighter } from "@fortawesome/free-solid-svg-icons";
-import { API_ENDPOINTS } from "../config/api";
+
+const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 function BodyMain1() {
   const [longUrl, setLongUrl] = useState("");
@@ -13,14 +14,14 @@ function BodyMain1() {
   const [recentLinks, setRecentLinks] = useState([]);
 
   useEffect(() => {
-    fetch(API_ENDPOINTS.GET_URLS)
+    fetch(`${API_BASE}/urls`)
       .then((res) => res.json())
       .then((data) => {
         if (data.ok) {
           setRecentLinks(
             data.urls.map((u) => ({
               longUrl: u.longUrl,
-              shortUrl: `http://localhost:5050/${u.shortId}`,
+              shortUrl: `${API_BASE}/${u.shortId}`,
             })),
           );
         }
@@ -34,7 +35,7 @@ function BodyMain1() {
     setShortUrl("");
     setLoading(true);
     try {
-      const res = await fetch(API_ENDPOINTS.SAVE_URL, {
+      const res = await fetch(`${API_BASE}/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ longUrl }),
@@ -47,7 +48,7 @@ function BodyMain1() {
         );
         setLongUrl("");
       } else {
-        setError(data.message || "Something went wrong. Please try again.");
+        setError("Something went wrong. Please try again.");
       }
     } catch {
       setError("Could not reach the server. Make sure the backend is running.");
@@ -59,7 +60,7 @@ function BodyMain1() {
   const handleDelete = async (shortUrl) => {
     const shortId = shortUrl.split("/").pop();
     try {
-      await fetch(API_ENDPOINTS.DELETE_URL(shortId), { method: "DELETE" });
+      await fetch(`${API_BASE}/urls/${shortId}`, { method: "DELETE" });
       setRecentLinks((prev) => prev.filter((l) => l.shortUrl !== shortUrl));
     } catch {
       // silently fail
