@@ -169,12 +169,20 @@ function BodyMain1() {
               <br />
               <input
                 className="bpr-form-input"
-                type="text"
+                type="url"
                 name="user-rule"
                 id="user-url"
                 placeholder="Paste your long URL here"
                 value={longUrl}
-                onChange={(e) => setLongUrl(e.target.value)}
+                onChange={(e) => {
+                  let value = e.target.value.trim();
+
+                  if (value && !/^https?:\/\//i.test(value)) {
+                    value = "http://" + value;
+                  }
+
+                  setLongUrl(value);
+                }}
                 required
               />
             </div>
