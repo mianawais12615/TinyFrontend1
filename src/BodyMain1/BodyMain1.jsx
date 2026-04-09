@@ -196,7 +196,6 @@ function BodyMain1() {
                   id="bpr-form-select1"
                 >
                   <option value="tinyurl.com">tinyurl.com</option>
-                  <option value="theahsan.com">theahsan.com</option>
                 </select>
               </div>
               <div className="bpr-form-p2-input2">
