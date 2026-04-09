@@ -3,8 +3,10 @@ import "./BodyMain1.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { faHighlighter } from "@fortawesome/free-solid-svg-icons";
+import toast from "react-hot-toast";
 
-const API_BASE = "https://tinyurl2.up.railway.app";
+const API_BASE =
+  import.meta.env.VITE_API_BASE || "https://tinyurl1.up.railway.app";
 
 function BodyMain1() {
   const [longUrl, setLongUrl] = useState("");
@@ -34,17 +36,27 @@ function BodyMain1() {
     setError("");
     setShortUrl("");
     setLoading(true);
+
+    // Normalize URL: add https:// if no protocol is present
+    let normalizedUrl = longUrl.trim();
+    if (!/^https?:\/\//i.test(normalizedUrl)) {
+      normalizedUrl = `https://${normalizedUrl}`;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ longUrl }),
+        body: JSON.stringify({ longUrl: normalizedUrl }),
       });
       const data = await res.json();
       if (data.ok) {
         setShortUrl(data.shortURL);
         setRecentLinks((prev) =>
-          [{ longUrl, shortUrl: data.shortURL }, ...prev].slice(0, 5),
+          [{ longUrl: normalizedUrl, shortUrl: data.shortURL }, ...prev].slice(
+            0,
+            5,
+          ),
         );
         setLongUrl("");
       } else {
@@ -62,8 +74,9 @@ function BodyMain1() {
     try {
       await fetch(`${API_BASE}/urls/${shortId}`, { method: "DELETE" });
       setRecentLinks((prev) => prev.filter((l) => l.shortUrl !== shortUrl));
+      toast.success("Link deleted successfully!");
     } catch {
-      // silently fail
+      toast.error("Failed to delete link");
     }
   };
 
@@ -169,20 +182,12 @@ function BodyMain1() {
               <br />
               <input
                 className="bpr-form-input"
-                type="url"
+                type="text"
                 name="user-rule"
                 id="user-url"
                 placeholder="Paste your long URL here"
                 value={longUrl}
-                onChange={(e) => {
-                  let value = e.target.value.trim();
-
-                  if (value && !/^https?:\/\//i.test(value)) {
-                    value = "http://" + value;
-                  }
-
-                  setLongUrl(value);
-                }}
+                onChange={(e) => setLongUrl(e.target.value)}
                 required
               />
             </div>
@@ -204,6 +209,7 @@ function BodyMain1() {
                   id="bpr-form-select1"
                 >
                   <option value="tinyurl.com">tinyurl.com</option>
+                  <option value="theahsan.com">theahsan.com</option>
                 </select>
               </div>
               <div className="bpr-form-p2-input2">
@@ -247,7 +253,10 @@ function BodyMain1() {
                 <button
                   type="button"
                   className="copy-btn"
-                  onClick={() => navigator.clipboard.writeText(shortUrl)}
+                  onClick={() => {
+                    navigator.clipboard.writeText(shortUrl);
+                    toast.success("Link copied to clipboard!");
+                  }}
                 >
                   Copy
                 </button>
