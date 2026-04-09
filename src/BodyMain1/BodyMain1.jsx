@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { faHighlighter } from "@fortawesome/free-solid-svg-icons";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "";
+const API_BASE = "https://tinyurl2.up.railway.app";
 
 function BodyMain1() {
   const [longUrl, setLongUrl] = useState("");
@@ -169,12 +169,20 @@ function BodyMain1() {
               <br />
               <input
                 className="bpr-form-input"
-                type="text"
+                type="url"
                 name="user-rule"
                 id="user-url"
                 placeholder="Paste your long URL here"
                 value={longUrl}
-                onChange={(e) => setLongUrl(e.target.value)}
+                onChange={(e) => {
+                  let value = e.target.value.trim();
+
+                  if (value && !/^https?:\/\//i.test(value)) {
+                    value = "http://" + value;
+                  }
+
+                  setLongUrl(value);
+                }}
                 required
               />
             </div>
